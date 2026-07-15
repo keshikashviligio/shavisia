@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: shavisia-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shavisia
+      POSTGRES_PASSWORD: shavisia
+      POSTGRES_DB: shavisia
+    ports:
+      - "5433:5432"
+    volumes:
+      - shavisia_pgdata:/var/lib/postgresql/data
+
+volumes:
+  shavisia_pgdata:

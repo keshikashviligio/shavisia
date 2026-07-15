@@ -1,0 +1,167 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { ERRORS } from "@/lib/license";
+import AuthModal from "./AuthModal";
+import AddModal from "./AddModal";
+
+const LICENSE_CHARS_RE = /^[A-Z0-9]*$/;
+
+type SearchResult =
+  | { state: "idle" }
+  | { state: "clean" }
+  | { state: "blacklisted"; comment: string }
+  | { state: "added"; license: string };
+
+export default function SearchBox() {
+  const [value, setValue] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<SearchResult>({ state: "idle" });
+  const [busy, setBusy] = useState(false);
+  const [modal, setModal] = useState<"auth" | "add" | null>(null);
+
+  const hasText = value.length > 0;
+
+  function handleChange(raw: string) {
+    const upper = raw.toUpperCase();
+    if (!LICENSE_CHARS_RE.test(upper)) {
+      setError(ERRORS.license);
+      setValue(upper.replace(/[^A-Z0-9]/g, ""));
+    } else {
+      setError(null);
+      setValue(upper);
+    }
+    setResult({ state: "idle" });
+  }
+
+  async function handleSearch() {
+    if (!hasText || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/blacklist/check?license=${encodeURIComponent(value)}`,
+      );
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setResult(
+        data.blacklisted
+          ? { state: "blacklisted", comment: data.comment }
+          : { state: "clean" },
+      );
+    } catch {
+      setError(ERRORS.generic);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleAdd() {
+    setError(null);
+    setResult({ state: "idle" });
+    const res = await fetch("/api/auth/me").catch(() => null);
+    setModal(res?.ok ? "add" : "auth");
+  }
+
+  const isBlacklisted = result.state === "blacklisted";
+
+  return (
+    <div className="w-full max-w-3xl flex flex-col items-start gap-6">
+      <Image
+        src={isBlacklisted ? "/icons/turtle-error.svg" : "/icons/turtle.svg"}
+        alt="shavisia.ge"
+        width={160}
+        height={160}
+        className="self-center"
+        priority
+      />
+
+      <p className="text-xl self-center text-center">
+        დაამატე ან გადაამოწმე მძღოლი{" "}
+        <strong>მართვის მოწმობის ნომრით</strong>
+      </p>
+
+      <form
+        className="w-full flex items-center bg-pill rounded-full p-3 pl-8"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (hasText) handleSearch();
+          else handleAdd();
+        }}
+      >
+        <input
+          value={value}
+          onChange={(e) => handleChange(e.target.value)}
+          placeholder="მაგ: AH0673483"
+          maxLength={15}
+          className="flex-1 bg-transparent text-2xl outline-none placeholder:text-neutral-400"
+          aria-label="მართვის მოწმობის ნომერი"
+        />
+        <button
+          type="submit"
+          disabled={busy}
+          className="flex items-center gap-2 bg-pill-button hover:bg-neutral-300 transition-colors text-black text-lg rounded-full px-6 py-3 disabled:opacity-60"
+        >
+          {hasText ? (
+            <>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              ძიება
+            </>
+          ) : (
+            <>
+              <span className="text-xl leading-none">+</span>
+              დამატება
+            </>
+          )}
+        </button>
+      </form>
+
+      {error && <p className="text-danger">{error}</p>}
+
+      {result.state === "clean" && (
+        <p className="text-ok text-2xl font-bold">მძღოლი არ არის შავ სიაში!</p>
+      )}
+
+      {result.state === "blacklisted" && (
+        <div className="flex flex-col gap-3">
+          <p className="text-danger text-2xl font-bold">მძღოლი შავ სიაშია!</p>
+          <div>
+            <p className="font-bold">კომენტარი:</p>
+            <p className="text-neutral-300 max-w-xl whitespace-pre-wrap">
+              {result.comment}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {result.state === "added" && (
+        <p className="text-ok text-2xl font-bold">
+          {result.license} დაემატა შავ სიაში
+        </p>
+      )}
+
+      {modal === "auth" && (
+        <AuthModal
+          onClose={() => setModal(null)}
+          onSuccess={() => setModal("add")}
+        />
+      )}
+
+      {modal === "add" && (
+        <AddModal
+          initialLicense={value}
+          onClose={() => setModal(null)}
+          onSuccess={(license) => {
+            setModal(null);
+            setValue("");
+            setResult({ state: "added", license });
+          }}
+        />
+      )}
+    </div>
+  );
+}

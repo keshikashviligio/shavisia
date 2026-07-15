@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EntryStatus {
+  ACTIVE
+  REMOVED
+}
+
+enum CreatedVia {
+  WEB
+  API
+}
+
+enum OtpPurpose {
+  LOGIN
+  CHANGE_PHONE
+}
+
+model User {
+  id        String           @id @default(cuid())
+  phone     String           @unique
+  createdAt DateTime         @default(now())
+  entries   BlacklistEntry[]
+}
+
+model ApiClient {
+  id            String           @id @default(cuid())
+  name          String           @unique
+  keyHash       String
+  active        Boolean          @default(true)
+  webhookUrl    String?
+  webhookSecret String?
+  createdAt     DateTime         @default(now())
+  entries       BlacklistEntry[]
+}
+
+/// Exactly one of createdById / apiClientId is set (CHECK constraint in migration).
+/// licenseNumber is unique among ACTIVE rows (partial unique index in migration).
+model BlacklistEntry {
+  id            String      @id @default(cuid())
+  licenseNumber String
+  comment       String      @db.VarChar(500)
+  status        EntryStatus @default(ACTIVE)
+  createdVia    CreatedVia
+  createdById   String?
+  createdBy     User?       @relation(fields: [createdById], references: [id])
+  apiClientId   String?
+  apiClient     ApiClient?  @relation(fields: [apiClientId], references: [id])
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  removedAt     DateTime?
+
+  @@index([licenseNumber, status])
+  @@index([createdById, status])
+}
+
+model OtpCode {
+  id        String     @id @default(cuid())
+  phone     String
+  codeHash  String
+  purpose   OtpPurpose @default(LOGIN)
+  expiresAt DateTime
+  attempts  Int        @default(0)
+  createdAt DateTime   @default(now())
+
+  @@index([phone, purpose])
+}

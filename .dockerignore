@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.github
+.idea
+.env*
+!.env.example
+src/generated
+migration-report.json
+deploy
+docs
+shavisia.ge icons
+shavisia.ge.pdf
+PLAN.md
+README.md
+AGENTS.md
+CLAUDE.md
