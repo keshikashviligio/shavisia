@@ -3,8 +3,15 @@ import { prisma } from "@/lib/db";
 import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
 import { verifyOtp, OTP_ERRORS } from "@/lib/otp";
 import { createSession } from "@/lib/session";
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, "otp-verify", {
+    limit: 15,
+    windowMs: 10 * 60_000,
+  });
+  if (limited) return limited;
+
   const body = await req.json().catch(() => ({}));
   const phone = normalizePhone(body.phone);
   const code = String(body.code ?? "").trim();

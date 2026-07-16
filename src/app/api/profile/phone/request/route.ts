@@ -4,8 +4,15 @@ import { getSessionUser } from "@/lib/session";
 import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
 import { issueOtp, OTP_ERRORS } from "@/lib/otp";
 import { sendSms, SmsSendError } from "@/lib/sms";
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, "phone-change", {
+    limit: 5,
+    windowMs: 10 * 60_000,
+  });
+  if (limited) return limited;
+
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: "ავტორიზაცია საჭიროა" }, { status: 401 });

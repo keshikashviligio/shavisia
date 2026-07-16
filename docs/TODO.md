@@ -1,4 +1,4 @@
-# TODO — shavisia.ge (updated 2026-07-15)
+# TODO — shavisia.ge (updated 2026-07-16)
 
 ## Current state
 
@@ -10,10 +10,13 @@ DigitalOcean droplet (`docs/DEPLOY.md`). Local dev: `docker compose up -d` + `np
 
 ## Kesho (things only you can do)
 
-- [ ] Create the GitHub repo and push `main` (`git remote add origin … && git push -u origin main`)
-- [ ] Create the DigitalOcean droplet and complete `docs/DEPLOY.md` steps 1–7
-      (Docker, `/opt/shavisia` files, `.env` secrets, ghcr login, DNS A records)
-- [ ] Add GitHub Actions secrets: `DO_HOST`, `DO_USER`, `DO_SSH_KEY`
+- [x] Create the GitHub repo and push `main` (github.com/keshikashviligio/shavisia)
+- [x] Create the DigitalOcean droplet (165.232.74.127) and complete `docs/DEPLOY.md`
+      steps — stack is running; deploy key is `~/.ssh/shavisia_deploy`
+- [ ] DNS: point `shavisia.ge` + `www.shavisia.ge` A records at 165.232.74.127
+      (currently `shavisia.ge` → 217.147.225.186, `www` has no record; HTTPS
+      cert can't issue until this is fixed)
+- [x] Add GitHub Actions secrets: `DO_HOST`, `DO_USER`, `DO_SSH_KEY` — deploy is green
 - [ ] smsoffice.ge: get the API key and an approved sender name; then test with
       `npx tsx scripts/sms-test.ts +9955XXXXXXXX "ტესტი"`
 - [ ] PayPro coordination:
@@ -30,7 +33,8 @@ DigitalOcean droplet (`docs/DEPLOY.md`). Local dev: `docker compose up -d` + `np
       `GET /api/v1/blacklist/check` on driver login, show "shavisia.ge" as the
       blacklist source (never the park name); optionally webhook receiver
 - [ ] Run the real PayPro migration (dry-run → review report → real run) once DB access exists
-- [ ] Rate limiting on public endpoints (`/api/blacklist/check`, OTP request) — per-IP
+- [x] Rate limiting on public endpoints — per-IP in-memory limiter (`src/lib/rateLimit.ts`)
+      on blacklist check (30/min), OTP request+verify, and phone change (5–15/10min)
 - [ ] Nightly `pg_dump` backup cron on the droplet (to DO Spaces or at least local rotation)
 - [ ] Visual pass in the browser against `shavisia.ge.pdf` (spacing, colors, mobile layout)
 - [ ] Small polish: loading states, close modals on Escape/outside-click consistency,

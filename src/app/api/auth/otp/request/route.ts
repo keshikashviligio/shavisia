@@ -2,8 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { normalizePhone, PHONE_ERROR } from "@/lib/phone";
 import { issueOtp, OTP_ERRORS } from "@/lib/otp";
 import { sendSms, SmsSendError } from "@/lib/sms";
+import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
+  const limited = rateLimit(req, "otp-request", {
+    limit: 5,
+    windowMs: 10 * 60_000,
+  });
+  if (limited) return limited;
+
   const body = await req.json().catch(() => ({}));
   const phone = normalizePhone(body.phone);
   if (!phone) {
