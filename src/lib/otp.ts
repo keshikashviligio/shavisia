@@ -1,5 +1,6 @@
 import { createHash, randomInt } from "crypto";
 import { prisma } from "./db";
+import { sessionSecret } from "./secret";
 
 export type OtpPurpose = "LOGIN" | "CHANGE_PHONE";
 
@@ -14,9 +15,7 @@ export const OTP_ERRORS = {
 } as const;
 
 function hash(code: string) {
-  return createHash("sha256")
-    .update(code + (process.env.SESSION_SECRET || "dev-secret-change-me"))
-    .digest("hex");
+  return createHash("sha256").update(code + sessionSecret()).digest("hex");
 }
 
 export async function issueOtp(phone: string, purpose: OtpPurpose) {

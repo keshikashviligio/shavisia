@@ -16,5 +16,9 @@ ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
 
+# .next/cache is the only path the server writes at runtime
+RUN chown -R node:node /app/.next
+USER node
+
 # apply pending migrations, then serve
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]

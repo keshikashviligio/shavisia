@@ -1,14 +1,13 @@
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "./db";
+import { sessionSecret } from "./secret";
 
 const COOKIE = "shavisia_session";
 const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 function secret() {
-  return new TextEncoder().encode(
-    process.env.SESSION_SECRET || "dev-secret-change-me",
-  );
+  return new TextEncoder().encode(sessionSecret());
 }
 
 export async function createSession(userId: string) {
