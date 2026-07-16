@@ -35,7 +35,8 @@ DigitalOcean droplet (`docs/DEPLOY.md`). Local dev: `docker compose up -d` + `np
 - [ ] Run the real PayPro migration (dry-run → review report → real run) once DB access exists
 - [x] Rate limiting on public endpoints — per-IP in-memory limiter (`src/lib/rateLimit.ts`)
       on blacklist check (30/min), OTP request+verify, and phone change (5–15/10min)
-- [ ] Nightly `pg_dump` backup cron on the droplet (to DO Spaces or at least local rotation)
+- [x] Nightly `pg_dump` backup cron on the droplet — `deploy/backup.sh`, 01:30 UTC,
+      7-day local rotation (see DEPLOY.md "Backups"); DO droplet backups recommended too
 - [ ] Visual pass in the browser against `shavisia.ge.pdf` (spacing, colors, mobile layout)
 - [ ] Small polish: loading states, close modals on Escape/outside-click consistency,
       OTP resend cooldown timer in the UI

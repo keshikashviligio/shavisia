@@ -71,4 +71,19 @@ docker compose exec db pg_dump -U shavisia shavisia > backup.sql   # backup
 docker compose pull app && docker compose up -d                   # manual deploy
 ```
 
-DB backups are your responsibility — a nightly `pg_dump` cron to DO Spaces is the simplest option.
+## Backups
+
+`deploy/backup.sh` lives on the droplet at `/opt/shavisia/backup.sh` and runs
+nightly at 01:30 UTC from root's crontab (`crontab -l`), writing gzipped dumps
+to `/opt/shavisia/backups/` with 7-day rotation. Log: `/var/log/shavisia-backup.log`.
+
+Restore:
+```bash
+gunzip -c /opt/shavisia/backups/shavisia-YYYY-MM-DD.sql.gz \
+  | docker compose exec -T db psql -U shavisia shavisia
+```
+
+These dumps live on the same droplet — combine with DigitalOcean droplet
+backups (weekly/daily snapshots, enable in the DO panel) so a dead droplet
+doesn't take the dumps with it. Copying dumps off-account (DO Spaces, rclone)
+is a further upgrade if the data becomes critical.
