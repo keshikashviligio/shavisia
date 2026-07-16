@@ -30,11 +30,51 @@ DigitalOcean droplet (`docs/DEPLOY.md`). Local dev: `docker compose up -d` + `np
 - [ ] After first deploy: generate the production PayPro API key on the droplet
       (`docker compose exec app npx tsx scripts/create-api-client.ts paypro`) and hand it to PayPro
 
-## Claude (next sessions)
+## NEXT SESSION (resume 2026-07-17): finish mygopro integration verification
 
-- [ ] PayPro-side integration in `~/Documents/mygopro`: call shavisia
-      `GET /api/v1/blacklist/check` on driver login, show "shavisia.ge" as the
-      blacklist source (never the park name); optionally webhook receiver
+The full-replacement integration is BUILT in both repos (decided 2026-07-16:
+mygopro reads/writes the blacklist only via the shavisia v1 API; local
+`driver_blacklist` table frozen, dropped after migration; login fail-open).
+
+**Uncommitted work** — do not lose:
+- shavisia (this repo): v1 list `status=`/`license=` filters, own `license` in
+  check payload, `docs/API.md` updates (check/check-batch/removed-webhook docs
+  are committed in `bef1a9a`; these deltas are not)
+- mygopro (~/Documents/mygopro, no git branch made): `services/shavisia.ts`,
+  `helpers/blacklistSync.ts`, `app/api/webhooks/shavisia/route.ts`, rewritten
+  login + blacklist admin routes (add/remove/update-status/list/info/by-licenses),
+  update-status schema keys on `license` now, `BlacklistList.tsx` (ID column
+  dropped, edit modal sends license), `.env.example` (SHAVISIA_* vars)
+
+**Test env (prepared, paused):** `docker start mygopro-test-mysql` →
+127.0.0.1:3307, root/test, db `mygopro`, all 94 migrations applied, seeded:
+park id 1 (`host_origin=localhost:3001`), user id 1 (phone +995555777888,
+license TEST9999), OTP row `12345` (numeric code in login body!). Local
+shavisia dev DB has API clients `testclient` + `client2` (keys in that DB only;
+re-read from session or recreate) and a webhook registered for testclient →
+`http://localhost:3001/api/webhooks/shavisia` (secret printed by set-webhook;
+re-run `npx tsx scripts/set-webhook.ts testclient <url>` to rotate if lost).
+Run mygopro: `DB_HOST=127.0.0.1 DB_PORT=3307 DB_USER=root DB_PASS=test
+DB_NAME=mygopro SHAVISIA_BASE_URL=http://localhost:3000 SHAVISIA_API_KEY=<testclient>
+SHAVISIA_WEBHOOK_SECRET=<whsec> npm run dev -- -p 3001`
+
+**Verified so far:** both repos typecheck; shavisia endpoints (phone check,
+own-metadata rule, batch, removed webhook + HMAC) verified live; mygopro clean
+login through the shavisia check verified (200, not blacklisted).
+
+**Remaining tests:** add via client2 → webhook restricts user row;
+login of restricted-cleared user → shavisia check path blocks (block_park_name
+= "shavisia.ge" for foreign entry); removed webhook → reactivates; bad webhook
+signature → 401; admin add/remove routes (needs seeded admin_user + role +
+admin-token cookie, or verify in staging). Then commit both repos.
+
+**Rollout order (important):** enable prod integration (SHAVISIA_* env on
+mygopro prod + prod API key + webhook registration on the droplet) ONLY
+together with the data migration — otherwise pre-existing local blacklist
+entries are invisible to the shavisia-backed checks.
+
+## Claude (later sessions)
+
 - [ ] Run the real PayPro migration once the dump arrives: load it into a throwaway
       MySQL container on the droplet (`docker run mysql:8` on 127.0.0.1:3307),
       point `PAYPRO_DATABASE_URL` at it, dry-run → review report → real run → remove container
@@ -42,11 +82,12 @@ DigitalOcean droplet (`docs/DEPLOY.md`). Local dev: `docker compose up -d` + `np
       on blacklist check (30/min), OTP request+verify, and phone change (5–15/10min)
 - [x] Nightly `pg_dump` backup cron on the droplet — `deploy/backup.sh`, 01:30 UTC,
       7-day local rotation (see DEPLOY.md "Backups"); DO droplet backups recommended too
+- [x] Security review pass (2026-07-16): headers/CSRF/OTP windows verified;
+      added security headers + HSTS, prod SESSION_SECRET guard, non-root
+      container (commit `06801f9`) — all verified in production
 - [ ] Visual pass in the browser against `shavisia.ge.pdf` (spacing, colors, mobile layout)
 - [ ] Small polish: loading states, close modals on Escape/outside-click consistency,
       OTP resend cooldown timer in the UI
-- [ ] Security review pass before launch (headers, CSRF posture on state-changing
-      routes, OTP brute-force windows)
 
 ## Parked / ideas
 
