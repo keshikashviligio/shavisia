@@ -16,11 +16,39 @@ Keys are issued per client (`npx tsx scripts/create-api-client.ts paypro`) and s
 
 ## Endpoints
 
-### `GET /api/v1/blacklist/check?license=AH0673483`
+### `GET /api/v1/blacklist/check?license=AH0673483&phone=%2B995555123456`
+
+At least one of `license` / `phone` is required (`400 license_or_phone_required`
+otherwise); invalid values are ignored so a malformed license never blocks a
+phone-only check. Phone matches entries whose `metadata.phone` was supplied at
+creation (integration adds and the PayPro migration set it). A license match
+wins over a phone match.
 
 ```json
 { "blacklisted": true, "comment": "…", "source": "shavisia.ge" }
 { "blacklisted": false, "source": "shavisia.ge" }
+```
+
+If the matched entry was created by the **calling client itself**, the response
+additionally carries its own `metadata` and `createdAt` — so an integration can
+show its internal park/admin/category for its own entries while foreign entries
+stay anonymous:
+
+```json
+{ "blacklisted": true, "comment": "…", "source": "shavisia.ge",
+  "metadata": { "park_id": 123, "admin_id": 45, "phone": "+995…", "category": "…" },
+  "createdAt": "2026-07-15T09:00:00.000Z" }
+```
+
+### `POST /api/v1/blacklist/check-batch`
+
+Body: `{ "licenses": ["AH0673483", "…"] }` (max 100). Returns results keyed by
+normalized license — **only blacklisted licenses appear**; invalid entries are
+skipped. Each value has the same shape as a `/check` response (own-entry
+metadata rule included):
+
+```json
+{ "results": { "AH0673483": { "blacklisted": true, "comment": "…", "source": "shavisia.ge" } } }
 ```
 
 ### `POST /api/v1/blacklist`
@@ -53,9 +81,9 @@ Lists the calling client's active entries (optionally filtered by `park_id`, max
 
 ## Webhooks
 
-A client can register a webhook URL (`npx tsx scripts/set-webhook.ts paypro https://paypro.example/webhooks/shavisia`). When any blacklist entry is added on shavisia.ge — by a website user or another integration — shavisia POSTs to the registered URL. **The client that created the entry is not notified of its own addition.**
+A client can register a webhook URL (`npx tsx scripts/set-webhook.ts paypro https://paypro.example/webhooks/shavisia`). When any blacklist entry is added **or removed** on shavisia.ge — by a website user or another integration — shavisia POSTs to the registered URL. **The client that performed the action is not notified of its own change.**
 
-Payload:
+Payloads:
 
 ```json
 {
@@ -63,6 +91,15 @@ Payload:
   "license": "AH0673483",
   "comment": "…",
   "createdAt": "2026-07-15T09:00:00.000Z",
+  "source": "shavisia.ge"
+}
+```
+
+```json
+{
+  "event": "blacklist.removed",
+  "license": "AH0673483",
+  "removedAt": "2026-07-16T09:00:00.000Z",
   "source": "shavisia.ge"
 }
 ```

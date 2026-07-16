@@ -1,13 +1,20 @@
 import { createHmac } from "crypto";
 import { prisma } from "./db";
 
-export type BlacklistWebhookEvent = {
-  event: "blacklist.added";
-  license: string;
-  comment: string;
-  createdAt: string;
-  source: "shavisia.ge";
-};
+export type BlacklistWebhookEvent =
+  | {
+      event: "blacklist.added";
+      license: string;
+      comment: string;
+      createdAt: string;
+      source: "shavisia.ge";
+    }
+  | {
+      event: "blacklist.removed";
+      license: string;
+      removedAt: string;
+      source: "shavisia.ge";
+    };
 
 const MAX_ATTEMPTS = 3;
 const TIMEOUT_MS = 5000;

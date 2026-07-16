@@ -146,10 +146,23 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
 
+  const removedAt = new Date();
   await prisma.blacklistEntry.update({
     where: { id: entry.id },
-    data: { status: "REMOVED", removedAt: new Date() },
+    data: { status: "REMOVED", removedAt },
   });
+  // notify other integrations, never the client that removed the entry
+  after(() =>
+    notifyWebhooks(
+      {
+        event: "blacklist.removed",
+        license,
+        removedAt: removedAt.toISOString(),
+        source: "shavisia.ge",
+      },
+      client.id,
+    ),
+  );
 
   return NextResponse.json({ ok: true });
 }

@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { getApiClient } from "@/lib/apiAuth";
 import { normalizeLicense } from "@/lib/license";
+import { normalizePhone } from "@/lib/phone";
+import { findActiveEntry, checkPayload } from "@/lib/blacklistCheck";
 
+// GET /api/v1/blacklist/check?license=AH0673483&phone=%2B995555123456
+// At least one of license/phone must be valid; invalid values are ignored
+// so a malformed license never blocks a phone-only check.
 export async function GET(req: NextRequest) {
   const client = await getApiClient(req);
   if (!client) {
@@ -10,19 +14,14 @@ export async function GET(req: NextRequest) {
   }
 
   const license = normalizeLicense(req.nextUrl.searchParams.get("license"));
-  if (!license) {
-    return NextResponse.json({ error: "invalid_license" }, { status: 400 });
+  const phone = normalizePhone(req.nextUrl.searchParams.get("phone"));
+  if (!license && !phone) {
+    return NextResponse.json(
+      { error: "license_or_phone_required" },
+      { status: 400 },
+    );
   }
 
-  const entry = await prisma.blacklistEntry.findFirst({
-    where: { licenseNumber: license, status: "ACTIVE" },
-    select: { comment: true },
-  });
-
-  // Never expose who reported the driver — only the shavisia.ge label.
-  return NextResponse.json(
-    entry
-      ? { blacklisted: true, comment: entry.comment, source: "shavisia.ge" }
-      : { blacklisted: false, source: "shavisia.ge" },
-  );
+  const entry = await findActiveEntry(license, phone);
+  return NextResponse.json(checkPayload(entry, client.id));
 }
