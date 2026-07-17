@@ -83,7 +83,7 @@ export default function SearchBox() {
       </p>
 
       <form
-        className="w-full flex items-center bg-pill rounded-full p-3 pl-8"
+        className="w-full flex items-center gap-2 bg-pill rounded-full p-2 pl-5 sm:p-3 sm:pl-8"
         onSubmit={(e) => {
           e.preventDefault();
           if (hasText) handleSearch();
@@ -95,28 +95,35 @@ export default function SearchBox() {
           onChange={(e) => handleChange(e.target.value)}
           placeholder="მაგ: AH0673483"
           maxLength={15}
-          className="flex-1 bg-transparent text-2xl outline-none placeholder:text-neutral-400"
+          className="flex-1 min-w-0 bg-transparent text-lg sm:text-2xl outline-none placeholder:text-neutral-400"
           aria-label="მართვის მოწმობის ნომერი"
         />
         <button
           type="submit"
           disabled={busy}
-          className="flex items-center gap-2 bg-pill-button hover:bg-neutral-300 transition-colors text-black text-lg rounded-full px-6 py-3 disabled:opacity-60"
+          className="flex shrink-0 items-center gap-2 bg-pill-button hover:bg-neutral-300 transition-colors text-black text-base sm:text-lg rounded-full px-4 py-2.5 sm:px-6 sm:py-3 disabled:opacity-60"
         >
-          {hasText ? (
-            <>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
-              ძიება
-            </>
+          {busy ? (
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="animate-spin"
+            >
+              <path d="M12 3a9 9 0 1 1-9 9" />
+            </svg>
+          ) : hasText ? (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
           ) : (
-            <>
-              <span className="text-xl leading-none">+</span>
-              დამატება
-            </>
+            <span className="text-xl leading-none">+</span>
           )}
+          {hasText ? "ძიება" : "დამატება"}
         </button>
       </form>
 

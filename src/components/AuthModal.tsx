@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "./Modal";
+
+const RESEND_COOLDOWN_S = 30;
 
 export default function AuthModal({
   onClose,
@@ -15,9 +17,16 @@ export default function AuthModal({
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   async function requestCode() {
-    if (busy) return;
+    if (busy || cooldown > 0) return;
     setBusy(true);
     setError(null);
     try {
@@ -27,8 +36,12 @@ export default function AuthModal({
         body: JSON.stringify({ phone }),
       });
       const data = await res.json();
-      if (!res.ok) setError(data.error);
-      else setStep("code");
+      if (!res.ok) {
+        setError(data.error);
+      } else {
+        setStep("code");
+        setCooldown(RESEND_COOLDOWN_S);
+      }
     } catch {
       setError("დაფიქსირდა შეცდომა, სცადეთ თავიდან");
     } finally {
@@ -113,9 +126,12 @@ export default function AuthModal({
           <button
             type="button"
             onClick={requestCode}
-            className="text-sm underline self-start mt-2"
+            disabled={cooldown > 0}
+            className="text-sm underline self-start mt-2 disabled:no-underline disabled:text-neutral-600"
           >
-            კოდის თავიდან გაგზავნა
+            {cooldown > 0
+              ? `კოდის თავიდან გაგზავნა (${cooldown}წმ)`
+              : "კოდის თავიდან გაგზავნა"}
           </button>
           <button
             type="submit"

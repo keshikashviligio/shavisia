@@ -26,7 +26,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col items-center text-center gap-4">
-            <Image src="/icons/badge-medal.png" alt="" width={88} height={88} />
+            <Image src="/icons/badge-medal.svg" alt="" width={88} height={88} />
             <h2 className="font-bold text-lg">
               გამქირავებელზე მორგებული გადაწყვეტა
             </h2>
