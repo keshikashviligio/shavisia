@@ -26,7 +26,8 @@ import { Prisma, PrismaClient } from "../src/generated/prisma/client";
 const LICENSE_RE = /^[A-Z0-9]{3,15}$/;
 const COURIER_RE = /^COURIER[0-9A-F]{8,}$/;
 const COMMENT_MAX = 500;
-const REPORT_PATH = "migration-report.json";
+// Overridable because /app is read-only for the non-root prod container.
+const REPORT_PATH = process.env.REPORT_PATH || "migration-report.json";
 
 type PayProRow = {
   id: number;
