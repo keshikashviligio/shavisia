@@ -75,17 +75,27 @@ entries are invisible to the shavisia-backed checks.
 
 ## Claude (later sessions)
 
-- [ ] Run the real PayPro migration. Direct access now exists: mygopro prod is
-      157.230.110.67 (root SSH with default key), MySQL bound to 127.0.0.1,
-      creds in `/var/www/mygopro/.env.local` (user/db `mygopro`) — so tunnel
-      (`ssh -L 3308:127.0.0.1:3306 root@157.230.110.67`) instead of a dump.
-      Dry run PASSED 2026-07-17 against prod data: 74 rows → 31 migrate,
-      35 removed-status, 0 duplicates, 0 empty comments, 8 invalid licenses —
-      all 8 are couriers with synthetic `COURIER<hash>` license values (>15
-      chars, no real license). DECIDE with PayPro: leave couriers behind
-      (report only) or handle separately. Real run: on the droplet inside
-      `docker compose exec app`, with a droplet→157.230.110.67 tunnel for
-      PAYPRO_DATABASE_URL; re-run at cutover (idempotent).
+- [ ] Run the REAL PayPro migration at cutover (dry runs verified 2026-07-17,
+      both from laptop and from the droplet's app container). Courier rows
+      (synthetic `COURIER<hash>` licenses) migrate truncated to 15 chars
+      (`fd68fd1`; mygopro service applies the same normalization, `c5c357a`) —
+      prod dry run: 74 rows → 39 migrate (8 courier-truncated), 35
+      removed-status, 0 invalid/duplicates/empty. Runbook (droplet has SSH
+      access to mygopro prod since 2026-07-17, key `shavisia-droplet-paypro-
+      migration`):
+      ```
+      ssh root@165.232.74.127
+      ssh -f -N -L 172.18.0.1:3308:127.0.0.1:3306 root@157.230.110.67
+      # DB_PASS from /var/www/mygopro/.env.local on 157.230.110.67 (URL-encode!)
+      cd /opt/shavisia && docker compose exec -T -w /tmp \
+        -e PAYPRO_DATABASE_URL="mysql://mygopro:<pass>@172.18.0.1:3308/mygopro" \
+        app npx tsx /app/scripts/migrate-paypro.ts --dry-run   # then real run
+      docker compose cp app:/tmp/migration-report.json .       # keep the report
+      pkill -f "ssh.*-L 172.18.0.1:3308"
+      ```
+      Prod `paypro` ApiClient already exists. Re-run at cutover picks up new
+      rows (idempotent). PayPro sign-off still pending: keep-earliest duplicate
+      rule (0 duplicates in current data) + courier truncation approach.
 - [x] Rate limiting on public endpoints — per-IP in-memory limiter (`src/lib/rateLimit.ts`)
       on blacklist check (30/min), OTP request+verify, and phone change (5–15/10min)
 - [x] Nightly `pg_dump` backup cron on the droplet — `deploy/backup.sh`, 01:30 UTC,
