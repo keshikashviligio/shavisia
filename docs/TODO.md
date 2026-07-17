@@ -75,9 +75,17 @@ entries are invisible to the shavisia-backed checks.
 
 ## Claude (later sessions)
 
-- [ ] Run the real PayPro migration once the dump arrives: load it into a throwaway
-      MySQL container on the droplet (`docker run mysql:8` on 127.0.0.1:3307),
-      point `PAYPRO_DATABASE_URL` at it, dry-run → review report → real run → remove container
+- [ ] Run the real PayPro migration. Direct access now exists: mygopro prod is
+      157.230.110.67 (root SSH with default key), MySQL bound to 127.0.0.1,
+      creds in `/var/www/mygopro/.env.local` (user/db `mygopro`) — so tunnel
+      (`ssh -L 3308:127.0.0.1:3306 root@157.230.110.67`) instead of a dump.
+      Dry run PASSED 2026-07-17 against prod data: 74 rows → 31 migrate,
+      35 removed-status, 0 duplicates, 0 empty comments, 8 invalid licenses —
+      all 8 are couriers with synthetic `COURIER<hash>` license values (>15
+      chars, no real license). DECIDE with PayPro: leave couriers behind
+      (report only) or handle separately. Real run: on the droplet inside
+      `docker compose exec app`, with a droplet→157.230.110.67 tunnel for
+      PAYPRO_DATABASE_URL; re-run at cutover (idempotent).
 - [x] Rate limiting on public endpoints — per-IP in-memory limiter (`src/lib/rateLimit.ts`)
       on blacklist check (30/min), OTP request+verify, and phone change (5–15/10min)
 - [x] Nightly `pg_dump` backup cron on the droplet — `deploy/backup.sh`, 01:30 UTC,
