@@ -75,7 +75,13 @@ entries are invisible to the shavisia-backed checks.
 
 ## Claude (later sessions)
 
-- [ ] Run the REAL PayPro migration at cutover (dry runs verified 2026-07-17,
+- [x] REAL PayPro migration RUN on prod 2026-07-17 (user-requested, to test
+      shavisia with real data): 74 rows → 39 migrated (8 courier-truncated),
+      all verified in prod DB + public check endpoint; report saved at
+      `/opt/shavisia/migration-report-20260717.json` on the droplet.
+      RE-RUN at cutover to pick up rows added since (idempotent) — runbook
+      below stays valid.
+- [ ] (superseded — kept for the runbook) Run the REAL PayPro migration at cutover (dry runs verified 2026-07-17,
       both from laptop and from the droplet's app container). Courier rows
       (synthetic `COURIER<hash>` licenses) migrate truncated to 15 chars
       (`fd68fd1`; mygopro service applies the same normalization, `c5c357a`) —
