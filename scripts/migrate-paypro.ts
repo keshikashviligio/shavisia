@@ -8,6 +8,10 @@
  * Rules (see PLAN.md):
  *   - only status='active' rows migrate; 'removed' rows are counted
  *   - license: trim + uppercase, must be Latin/digits 3-15 — else reported
+ *   - courier rows (synthetic `COURIER<hash>` licenses, ~39 chars) are
+ *     truncated to 15 chars (COURIER + first 8 hash chars) — the same
+ *     normalization mygopro's shavisia service applies; the full value is
+ *     kept in metadata.original_license and matching also works by phone
  *   - comment: required, truncated to 500 (original kept in metadata)
  *   - duplicates: licenseNumber is unique among ACTIVE — keep the earliest
  *     source row, report the rest; licenses already in shavisia are skipped
@@ -20,6 +24,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Prisma, PrismaClient } from "../src/generated/prisma/client";
 
 const LICENSE_RE = /^[A-Z0-9]{3,15}$/;
+const COURIER_RE = /^COURIER[0-9A-F]{8,}$/;
 const COMMENT_MAX = 500;
 const REPORT_PATH = "migration-report.json";
 
@@ -87,6 +92,7 @@ async function main() {
       total: source.length,
       migrated: 0,
       removedStatus: 0,
+      courierTruncated: 0,
       invalidLicense: 0,
       emptyComment: 0,
       duplicateInSource: 0,
@@ -107,7 +113,13 @@ async function main() {
       continue;
     }
 
-    const license = (row.driver_license_number ?? "").trim().toUpperCase();
+    let license = (row.driver_license_number ?? "").trim().toUpperCase();
+    let originalLicense: string | null = null;
+    if (license.length > 15 && COURIER_RE.test(license)) {
+      originalLicense = license;
+      license = license.slice(0, 15);
+      report.counts.courierTruncated++;
+    }
     if (!LICENSE_RE.test(license)) {
       report.counts.invalidLicense++;
       report.invalidLicense.push(row);
@@ -140,6 +152,7 @@ async function main() {
     if (row.car_number) metadata.car_number = row.car_number;
     if (row.category) metadata.category = row.category;
     if (truncated) metadata.original_comment = fullComment;
+    if (originalLicense) metadata.original_license = originalLicense;
 
     if (!dryRun) {
       await prisma.blacklistEntry.create({
