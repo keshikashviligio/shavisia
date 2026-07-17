@@ -30,12 +30,13 @@ wins over a phone match.
 ```
 
 If the matched entry was created by the **calling client itself**, the response
-additionally carries its own `metadata` and `createdAt` — so an integration can
-show its internal park/admin/category for its own entries while foreign entries
-stay anonymous:
+additionally carries the entry's `license` (useful for phone-only checks), its
+own `metadata` and `createdAt` — so an integration can show its internal
+park/admin/category for its own entries while foreign entries stay anonymous:
 
 ```json
 { "blacklisted": true, "comment": "…", "source": "shavisia.ge",
+  "license": "AH0673483",
   "metadata": { "park_id": 123, "admin_id": 45, "phone": "+995…", "category": "…" },
   "createdAt": "2026-07-15T09:00:00.000Z" }
 ```
@@ -71,12 +72,17 @@ Soft-removes the entry — only if it was created by the calling client **and** 
 
 Note: after removal the license can be blacklisted again (by anyone).
 
-### `GET /api/v1/blacklist?park_id=123`
+### `GET /api/v1/blacklist?park_id=123&status=active&license=AH0673483`
 
-Lists the calling client's active entries (optionally filtered by `park_id`, max 1000, newest first):
+Lists the calling client's entries (max 1000, newest first). Filters, all optional:
+
+- `status` — `active` (default) · `removed` · `all` (`400 invalid_status` otherwise)
+- `license` — exact match (normalized to uppercase)
+- `park_id` — matches `metadata.park_id`
 
 ```json
-{ "entries": [ { "licenseNumber": "…", "comment": "…", "metadata": {…}, "createdAt": "…" } ] }
+{ "entries": [ { "licenseNumber": "…", "comment": "…", "metadata": {…},
+  "status": "ACTIVE", "createdAt": "…", "removedAt": null } ] }
 ```
 
 ## Webhooks

@@ -30,43 +30,43 @@ DigitalOcean droplet (`docs/DEPLOY.md`). Local dev: `docker compose up -d` + `np
 - [ ] After first deploy: generate the production PayPro API key on the droplet
       (`docker compose exec app npx tsx scripts/create-api-client.ts paypro`) and hand it to PayPro
 
-## NEXT SESSION (resume 2026-07-17): finish mygopro integration verification
+## mygopro integration — VERIFIED 2026-07-17, both repos committed
 
-The full-replacement integration is BUILT in both repos (decided 2026-07-16:
-mygopro reads/writes the blacklist only via the shavisia v1 API; local
-`driver_blacklist` table frozen, dropped after migration; login fail-open).
+All integration tests passed live on 2026-07-17 (shavisia :3000 + mygopro :3001
+against the seeded test MySQL):
+- add via client2 → `blacklist.added` webhook restricted mygopro user
+  (utf8mb4 Georgian comment stored correctly)
+- login of blacklisted user → shavisia check blocks (500, user restricted,
+  `block_park_name = "shavisia.ge"` for the foreign entry)
+- forged + missing webhook HMAC → 401, no state change
+- DELETE via client2 → `blacklist.removed` webhook reactivated the user
+- all six admin routes verified with a seeded super-admin (park 1):
+  add / remove / update-status (removed↔active round-trip, keys on license,
+  uses the new `status=all&license=` list filters) / list / info / by-licenses
+  (body key is `license_numbers`)
 
-**Uncommitted work** — do not lose:
-- shavisia (this repo): v1 list `status=`/`license=` filters, own `license` in
-  check payload, `docs/API.md` updates (check/check-batch/removed-webhook docs
-  are committed in `bef1a9a`; these deltas are not)
-- mygopro (~/Documents/mygopro, no git branch made): `services/shavisia.ts`,
-  `helpers/blacklistSync.ts`, `app/api/webhooks/shavisia/route.ts`, rewritten
-  login + blacklist admin routes (add/remove/update-status/list/info/by-licenses),
-  update-status schema keys on `license` now, `BlacklistList.tsx` (ID column
-  dropped, edit modal sends license), `.env.example` (SHAVISIA_* vars)
+**Caveats / follow-ups:**
+- [ ] admin `add` calls the Yandex Fleet API (`findByProfileIdV1`, env
+      `YANDEX_BASE_URL`) for the car number — verified against a local mock;
+      re-check once in staging with the real fleet API
+- [ ] `app/api/register/verify-phone/route.ts` issues a session token with NO
+      shavisia check (only the local `status=restricted` guard) — a driver
+      blacklisted on shavisia but not yet restricted at that park can register
+      and get a session until their next login. Pre-existing behavior (old code
+      had the same gap), but decide whether registration should also check.
+- mygopro has two UNCOMMITTED files unrelated to this integration (left as-is):
+  `app/admin/dashboard/rental/CarFormModal.tsx` (taxi_license default/options
+  tweaks) and `app/api/register/verify-phone/route.ts` (notify-admins dedup on
+  re-verification)
 
-**Test env (prepared, paused):** `docker start mygopro-test-mysql` →
-127.0.0.1:3307, root/test, db `mygopro`, all 94 migrations applied, seeded:
-park id 1 (`host_origin=localhost:3001`), user id 1 (phone +995555777888,
-license TEST9999), OTP row `12345` (numeric code in login body!). Local
-shavisia dev DB has API clients `testclient` + `client2` (keys in that DB only;
-re-read from session or recreate) and a webhook registered for testclient →
-`http://localhost:3001/api/webhooks/shavisia` (secret printed by set-webhook;
-re-run `npx tsx scripts/set-webhook.ts testclient <url>` to rotate if lost).
-Run mygopro: `DB_HOST=127.0.0.1 DB_PORT=3307 DB_USER=root DB_PASS=test
-DB_NAME=mygopro SHAVISIA_BASE_URL=http://localhost:3000 SHAVISIA_API_KEY=<testclient>
-SHAVISIA_WEBHOOK_SECRET=<whsec> npm run dev -- -p 3001`
-
-**Verified so far:** both repos typecheck; shavisia endpoints (phone check,
-own-metadata rule, batch, removed webhook + HMAC) verified live; mygopro clean
-login through the shavisia check verified (200, not blacklisted).
-
-**Remaining tests:** add via client2 → webhook restricts user row;
-login of restricted-cleared user → shavisia check path blocks (block_park_name
-= "shavisia.ge" for foreign entry); removed webhook → reactivates; bad webhook
-signature → 401; admin add/remove routes (needs seeded admin_user + role +
-admin-token cookie, or verify in staging). Then commit both repos.
+**Test env:** `docker start mygopro-test-mysql` → 127.0.0.1:3307, root/test,
+db `mygopro`; park id 1, user id 1 (+995555777888 / TEST9999, OTP `12345`,
+numeric in body), super-admin id 100 (+995555000111, code `54321`, numeric).
+API keys rotated 2026-07-17 (dev only, hashed in dev DB — recreate via
+`scripts/create-api-client.ts` + `scripts/set-webhook.ts` if needed).
+Mock fleet API used for admin add: serve
+`POST /v1/parks/driver-profiles/list` → `{driver_profiles:[{driver_profile:
+{...}, car:{number:"..."}}]}` and set `YANDEX_BASE_URL` on mygopro.
 
 **Rollout order (important):** enable prod integration (SHAVISIA_* env on
 mygopro prod + prod API key + webhook registration on the droplet) ONLY

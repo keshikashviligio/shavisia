@@ -16,7 +16,8 @@ function parkIdFilters(parkId: string): Prisma.BlacklistEntryWhereInput[] {
   return filters;
 }
 
-// GET /api/v1/blacklist?park_id=123 — list the calling client's active entries
+// GET /api/v1/blacklist?park_id=123&status=active|removed|all
+// Lists the calling client's entries (default: active only).
 export async function GET(req: NextRequest) {
   const client = await getApiClient(req);
   if (!client) {
@@ -24,10 +25,19 @@ export async function GET(req: NextRequest) {
   }
 
   const parkId = req.nextUrl.searchParams.get("park_id");
+  const license = normalizeLicense(req.nextUrl.searchParams.get("license"));
+  const status = req.nextUrl.searchParams.get("status") ?? "active";
+  if (!["active", "removed", "all"].includes(status)) {
+    return NextResponse.json({ error: "invalid_status" }, { status: 400 });
+  }
+
   const entries = await prisma.blacklistEntry.findMany({
     where: {
       apiClientId: client.id,
-      status: "ACTIVE",
+      ...(status === "all"
+        ? {}
+        : { status: status === "removed" ? "REMOVED" : "ACTIVE" }),
+      ...(license ? { licenseNumber: license } : {}),
       ...(parkId ? { OR: parkIdFilters(parkId) } : {}),
     },
     orderBy: { createdAt: "desc" },
@@ -36,7 +46,9 @@ export async function GET(req: NextRequest) {
       licenseNumber: true,
       comment: true,
       metadata: true,
+      status: true,
       createdAt: true,
+      removedAt: true,
     },
   });
 

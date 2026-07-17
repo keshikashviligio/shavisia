@@ -52,7 +52,11 @@ export function checkPayload(entry: CheckedEntry | null, clientId: string) {
     comment: entry.comment,
     source: "shavisia.ge" as const,
     ...(entry.apiClientId === clientId
-      ? { metadata: entry.metadata, createdAt: entry.createdAt.toISOString() }
+      ? {
+          license: entry.licenseNumber,
+          metadata: entry.metadata,
+          createdAt: entry.createdAt.toISOString(),
+        }
       : {}),
   };
 }
