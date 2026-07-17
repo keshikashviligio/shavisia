@@ -1,125 +1,83 @@
-# TODO — shavisia.ge (updated 2026-07-16)
+# TODO — shavisia.ge (updated 2026-07-17 evening)
 
 ## Current state
 
-Everything in `PLAN.md` is built, smoke-tested, and committed (initial commit `80c5209`):
-site (search / add / OTP auth / account area), PayPro API v1 + webhooks,
-`migrate-paypro.ts` (MySQL, verified against a seeded test DB), smsoffice.ge SMS
-integration (dev mode works without a key), Docker + GitHub Actions deploy for a
-DigitalOcean droplet (`docs/DEPLOY.md`). Local dev: `docker compose up -d` + `npm run dev`.
+**The system is live end-to-end.** shavisia.ge runs on the droplet
+(165.232.74.127, push-to-main auto-deploys); the mygopro (PayPro) integration
+is deployed on their prod (157.230.110.67 / gopro.ge) and confirmed working —
+all blacklist reads/writes go through the shavisia v1 API, the prod webhook is
+registered (`https://gopro.ge/api/webhooks/shavisia`). The data migration ran
+2026-07-17 (74 rows → 39 migrated incl. 8 courier-truncated; report:
+`/opt/shavisia/migration-report-20260717.json` on the droplet); the cutover
+re-run found 0 new rows, so there is no data gap. Design pass vs
+`shavisia.ge.pdf` done (colored right-facing turtle, red on blacklisted, mobile
+layout, modal/OTP polish — `74433f9`, `b330a1a`).
 
-## Kesho (things only you can do)
+Local dev: `docker compose up -d` + `npm run dev`. mygopro test env:
+`docker start mygopro-test-mysql` (127.0.0.1:3307 root/test, park 1, user 1
++995555777888/TEST9999 OTP `12345`, super-admin 100 +995555000111 code `54321`).
 
-- [x] Create the GitHub repo and push `main` (github.com/keshikashviligio/shavisia)
-- [x] Create the DigitalOcean droplet (165.232.74.127) and complete `docs/DEPLOY.md`
-      steps — stack is running; deploy key is `~/.ssh/shavisia_deploy`
-- [ ] DNS: point `shavisia.ge` + `www.shavisia.ge` A records at 165.232.74.127
-      (currently `shavisia.ge` → 217.147.225.186, `www` has no record; HTTPS
-      cert can't issue until this is fixed)
-- [x] Add GitHub Actions secrets: `DO_HOST`, `DO_USER`, `DO_SSH_KEY` — deploy is green
-- [ ] smsoffice.ge: get the API key and an approved sender name; then test with
-      `npx tsx scripts/sms-test.ts +9955XXXXXXXX "ტესტი"`
-- [ ] PayPro coordination:
-  - [ ] sign off the migration duplicate rule (same license in several parks →
-        keep earliest, rest go to `migration-report.json`)
-  - [ ] get a MySQL dump of the `driver_blacklist` table (no direct prod DB access —
-        decided 2026-07-16): `mysqldump --single-transaction
-        --default-character-set=utf8mb4 <db> driver_blacklist > paypro_blacklist.sql`;
-        ask for a fresh dump again at cutover (script is idempotent, re-run picks up new rows)
-  - [ ] decide the PayPro webhook endpoint URL (if PayPro wants push updates)
-- [ ] After first deploy: generate the production PayPro API key on the droplet
-      (`docker compose exec app npx tsx scripts/create-api-client.ts paypro`) and hand it to PayPro
+## Launch blockers (Kesho — only you can do these)
 
-## mygopro integration — VERIFIED 2026-07-17, both repos committed
+- [ ] **DNS**: point `shavisia.ge` + `www.shavisia.ge` A records at
+      165.232.74.127 (currently → 217.147.225.186, `www` missing). HTTPS cert
+      can't issue until then, so the public site is effectively unreachable.
+- [ ] **smsoffice.ge**: API key + approved sender name — without it prod OTP
+      codes only land in app logs, so real users cannot log in/register.
+      Test after: `npx tsx scripts/sms-test.ts +9955XXXXXXXX "ტესტი"`
 
-All integration tests passed live on 2026-07-17 (shavisia :3000 + mygopro :3001
-against the seeded test MySQL):
-- add via client2 → `blacklist.added` webhook restricted mygopro user
-  (utf8mb4 Georgian comment stored correctly)
-- login of blacklisted user → shavisia check blocks (500, user restricted,
-  `block_park_name = "shavisia.ge"` for the foreign entry)
-- forged + missing webhook HMAC → 401, no state change
-- DELETE via client2 → `blacklist.removed` webhook reactivated the user
-- all six admin routes verified with a seeded super-admin (park 1):
-  add / remove / update-status (removed↔active round-trip, keys on license,
-  uses the new `status=all&license=` list filters) / list / info / by-licenses
-  (body key is `license_numbers`)
+## Tomorrow (Claude)
 
-**Caveats / follow-ups:**
-- [ ] admin `add` calls the Yandex Fleet API (`findByProfileIdV1`, env
-      `YANDEX_BASE_URL`) for the car number — verified against a local mock;
-      re-check once in staging with the real fleet API
-- [ ] `app/api/register/verify-phone/route.ts` issues a session token with NO
-      shavisia check (only the local `status=restricted` guard) — a driver
-      blacklisted on shavisia but not yet restricted at that park can register
-      and get a session until their next login. Pre-existing behavior (old code
-      had the same gap), but decide whether registration should also check.
-- mygopro has two UNCOMMITTED files unrelated to this integration (left as-is):
-  `app/admin/dashboard/rental/CarFormModal.tsx` (taxi_license default/options
-  tweaks) and `app/api/register/verify-phone/route.ts` (notify-admins dedup on
-  re-verification)
+- [ ] **Offsite backups** — nightly pg_dump currently stays on the same droplet
+      (7-day rotation): single point of failure. Cheapest fix with zero new
+      accounts: after each backup, scp the dump to the mygopro server
+      (157.230.110.67, droplet already has SSH access) into e.g.
+      `/root/shavisia-backups/` with its own rotation. DO Spaces later if wanted.
+- [ ] **Launch meta** — `robots.txt`, `sitemap.xml`, openGraph/Twitter metadata
+      in `layout.tsx` + an og-image (turtle + shavisia.ge wordmark). Favicon
+      already exists (`src/app/icon.svg`).
+- [ ] **Health + uptime** — add `/api/health` (DB ping); cron on the mygopro
+      server curling it every 5 min and mailing/logging on failure (both boxes
+      are ours — no external service needed). Revisit real monitoring later.
+- [ ] **Prod webhook smoke test** — one add+remove of a TEST license via the
+      shavisia v1 API on prod, confirm gopro.ge receives both events (was only
+      verified on the local test env; prod registration exists but hasn't been
+      exercised end-to-end).
+- [ ] **E2E capture scripts → repo** — move the puppeteer-core screenshot
+      scripts out of the session scratchpad into `scripts/e2e/` so visual
+      regression checks survive this session.
 
-**Test env:** `docker start mygopro-test-mysql` → 127.0.0.1:3307, root/test,
-db `mygopro`; park id 1, user id 1 (+995555777888 / TEST9999, OTP `12345`,
-numeric in body), super-admin id 100 (+995555000111, code `54321`, numeric).
-API keys rotated 2026-07-17 (dev only, hashed in dev DB — recreate via
-`scripts/create-api-client.ts` + `scripts/set-webhook.ts` if needed).
-Mock fleet API used for admin add: serve
-`POST /v1/parks/driver-profiles/list` → `{driver_profiles:[{driver_profile:
-{...}, car:{number:"..."}}]}` and set `YANDEX_BASE_URL` on mygopro.
+## mygopro follow-ups (decide/verify with Kesho)
 
-**Rollout order (important):** enable prod integration (SHAVISIA_* env on
-mygopro prod + prod API key + webhook registration on the droplet) ONLY
-together with the data migration — otherwise pre-existing local blacklist
-entries are invisible to the shavisia-backed checks.
+- [ ] admin blacklist `add` was verified against a mocked Yandex Fleet API —
+      exercise once on gopro.ge prod/staging with the real fleet API (it
+      fetches the car number via `findByProfileIdV1`).
+- [ ] `register/verify-phone` issues a session with NO shavisia check (only the
+      local restricted guard) — a shavisia-blacklisted driver can register at a
+      new park and hold a session until next login. Pre-existing gap; decide
+      whether registration should also call the check (small change, mirrors
+      the login block).
+- [ ] Two uncommitted files in ~/Documents/mygopro unrelated to the integration:
+      `CarFormModal.tsx` (taxi_license tweaks), `verify-phone/route.ts`
+      (notify-admins dedup). Commit or discard.
 
-## Claude (later sessions)
+## Ideas / parked
 
-- [x] REAL PayPro migration RUN on prod 2026-07-17 (user-requested, to test
-      shavisia with real data): 74 rows → 39 migrated (8 courier-truncated),
-      all verified in prod DB + public check endpoint; report saved at
-      `/opt/shavisia/migration-report-20260717.json` on the droplet.
-      RE-RUN at cutover to pick up rows added since (idempotent) — runbook
-      below stays valid.
-- [ ] (superseded — kept for the runbook) Run the REAL PayPro migration at cutover (dry runs verified 2026-07-17,
-      both from laptop and from the droplet's app container). Courier rows
-      (synthetic `COURIER<hash>` licenses) migrate truncated to 15 chars
-      (`fd68fd1`; mygopro service applies the same normalization, `c5c357a`) —
-      prod dry run: 74 rows → 39 migrate (8 courier-truncated), 35
-      removed-status, 0 invalid/duplicates/empty. Runbook (droplet has SSH
-      access to mygopro prod since 2026-07-17, key `shavisia-droplet-paypro-
-      migration`):
-      ```
-      ssh root@165.232.74.127
-      ssh -f -N -L 172.18.0.1:3308:127.0.0.1:3306 root@157.230.110.67
-      # DB_PASS from /var/www/mygopro/.env.local on 157.230.110.67 (URL-encode!)
-      cd /opt/shavisia && docker compose exec -T -w /tmp \
-        -e PAYPRO_DATABASE_URL="mysql://mygopro:<pass>@172.18.0.1:3308/mygopro" \
-        app npx tsx /app/scripts/migrate-paypro.ts --dry-run   # then real run
-      docker compose cp app:/tmp/migration-report.json .       # keep the report
-      pkill -f "ssh.*-L 172.18.0.1:3308"
-      ```
-      Prod `paypro` ApiClient already exists. Re-run at cutover picks up new
-      rows (idempotent). PayPro sign-off still pending: keep-earliest duplicate
-      rule (0 duplicates in current data) + courier truncation approach.
-- [x] Rate limiting on public endpoints — per-IP in-memory limiter (`src/lib/rateLimit.ts`)
-      on blacklist check (30/min), OTP request+verify, and phone change (5–15/10min)
-- [x] Nightly `pg_dump` backup cron on the droplet — `deploy/backup.sh`, 01:30 UTC,
-      7-day local rotation (see DEPLOY.md "Backups"); DO droplet backups recommended too
-- [x] Security review pass (2026-07-16): headers/CSRF/OTP windows verified;
-      added security headers + HSTS, prod SESSION_SECRET guard, non-root
-      container (commit `06801f9`) — all verified in production
-- [x] Visual pass against `shavisia.ge.pdf` (2026-07-17, commit `74433f9`):
-      fixed invisible mascot/icons (black-on-black SVGs — turtle now the colored
-      variant, red variant on blacklisted result verified), mobile search-pill
-      overflow, white shield + new SVG rosette. All states screenshot-verified
-      (home/typed/clean/blacklisted/auth/add/account, desktop + 390px) via
-      puppeteer-core driving system Chrome (scratchpad scripts).
-- [x] Small polish (same commit): search-button spinner, modals close on
-      Escape (outside-click already worked), 30s OTP resend cooldown countdown
-
-## Parked / ideas
-
-- Outbox table + retry cron if webhook delivery ever needs to be guaranteed
+- **Dispute flow**: the site publishes claims about identifiable drivers; add a
+  visible "როგორ გავასაჩივრო" (how to dispute) note pointing at the support
+  email, and think about takedown handling — reduces legal exposure under
+  Georgian personal-data rules.
+- Error tracking for shavisia (mygopro already has Sentry; needs an account
+  decision).
+- Outbox table + retry cron if webhook delivery ever needs to be guaranteed.
 - Pagination for "ჩემი გაშავებული" and the v1 list endpoint if lists grow
-- Admin view (entry counts per client/park) if moderation is ever needed
+  (39 entries today).
+- Admin view (entry counts per client/park) if moderation is ever needed.
+
+## Reference
+
+- PayPro migration runbook (tunnel via droplet→157.230.110.67, `-w /tmp`,
+  `REPORT_PATH`): see git history of this file at `6b5e042` if ever needed
+  again — the migration itself is complete and idempotent re-runs found 0 rows.
+- Droplet has SSH key `shavisia-droplet-paypro-migration` authorized on the
+  mygopro server; mygopro DB creds live in `/var/www/mygopro/.env.local` there.
