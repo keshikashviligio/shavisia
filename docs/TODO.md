@@ -109,9 +109,14 @@ entries are invisible to the shavisia-backed checks.
 - [x] Security review pass (2026-07-16): headers/CSRF/OTP windows verified;
       added security headers + HSTS, prod SESSION_SECRET guard, non-root
       container (commit `06801f9`) — all verified in production
-- [ ] Visual pass in the browser against `shavisia.ge.pdf` (spacing, colors, mobile layout)
-- [ ] Small polish: loading states, close modals on Escape/outside-click consistency,
-      OTP resend cooldown timer in the UI
+- [x] Visual pass against `shavisia.ge.pdf` (2026-07-17, commit `74433f9`):
+      fixed invisible mascot/icons (black-on-black SVGs — turtle now the colored
+      variant, red variant on blacklisted result verified), mobile search-pill
+      overflow, white shield + new SVG rosette. All states screenshot-verified
+      (home/typed/clean/blacklisted/auth/add/account, desktop + 390px) via
+      puppeteer-core driving system Chrome (scratchpad scripts).
+- [x] Small polish (same commit): search-button spinner, modals close on
+      Escape (outside-click already worked), 30s OTP resend cooldown countdown
 
 ## Parked / ideas
 
