@@ -63,6 +63,7 @@ export default function Header() {
             setShowAuth(false);
             setOpen(true);
             router.refresh();
+            window.scroll({ top: 0, behavior: "smooth" });
           }}
         />
       )}

@@ -37,6 +37,7 @@ export default function SearchBox() {
 
   async function handleSearch() {
     if (!hasText || busy) return;
+    window.scroll({ top: 0, behavior: "smooth" });
     if (!LICENSE_STRICT_RE.test(value)) {
       setError(ERRORS.licenseInvalid);
       setResult({ state: "idle" });
