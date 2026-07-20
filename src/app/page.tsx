@@ -37,8 +37,8 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <div className="max-w-5xl mx-auto mt-16 text-sm text-neutral-300 flex flex-col gap-2">
-          <p>Support: shavisia@mail.ge</p>
+        <div className="max-w-5xl mx-auto mt-16 text-center sm:text-left text-sm text-neutral-300 flex flex-col gap-2">
+          <p>Support: info@shavisia.ge</p>
           <p>Copyright © 2026 shavisia.ge</p>
         </div>
       </footer>
