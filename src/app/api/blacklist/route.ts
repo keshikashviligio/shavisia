@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse, after } from "next/server";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
-import { normalizeLicense, ERRORS, COMMENT_MAX } from "@/lib/license";
+import {
+  normalizeLicense,
+  ERRORS,
+  COMMENT_MAX,
+  LICENSE_STRICT_RE,
+} from "@/lib/license";
 import { notifyWebhooks } from "@/lib/webhooks";
 
 export async function POST(req: NextRequest) {
@@ -15,6 +20,10 @@ export async function POST(req: NextRequest) {
   if (!license) {
     return NextResponse.json({ error: ERRORS.license }, { status: 400 });
   }
+  // // web adds are Georgian licences only; courier/legacy formats stay API-only
+  // if (!LICENSE_STRICT_RE.test(license)) {
+  //   return NextResponse.json({ error: ERRORS.licenseInvalid }, { status: 400 });
+  // }
   const comment = String(body.comment ?? "").trim();
   if (!comment) {
     return NextResponse.json({ error: ERRORS.commentRequired }, { status: 400 });

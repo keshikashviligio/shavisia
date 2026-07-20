@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Modal from "./Modal";
-import { ERRORS, COMMENT_MAX } from "@/lib/license";
+import { ERRORS, COMMENT_MAX, LICENSE_STRICT_RE } from "@/lib/license";
 
 const LICENSE_CHARS_RE = /^[A-Z0-9]*$/;
 
@@ -34,6 +34,8 @@ export default function AddModal({
   async function submit() {
     if (busy) return;
     if (!license) return setError(ERRORS.licenseRequired);
+    if (!LICENSE_STRICT_RE.test(license))
+      return setError(ERRORS.licenseInvalid);
     if (!comment.trim()) return setError(ERRORS.commentRequired);
     setBusy(true);
     setError(null);
@@ -70,7 +72,7 @@ export default function AddModal({
           value={license}
           onChange={(e) => handleLicenseChange(e.target.value)}
           placeholder="AH0673483"
-          maxLength={15}
+          maxLength={9}
           autoFocus={!initialLicense}
           className="bg-transparent border-b border-white/30 focus:border-white pb-1 outline-none placeholder:text-neutral-500"
         />

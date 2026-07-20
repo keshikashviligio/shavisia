@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ERRORS, LICENSE_RE } from "@/lib/license";
+import { ERRORS, LICENSE_STRICT_RE } from "@/lib/license";
 import AuthModal from "./AuthModal";
 import AddModal from "./AddModal";
 
@@ -37,7 +37,7 @@ export default function SearchBox() {
 
   async function handleSearch() {
     if (!hasText || busy) return;
-    if (!LICENSE_RE.test(value)) {
+    if (!LICENSE_STRICT_RE.test(value)) {
       setError(ERRORS.licenseInvalid);
       setResult({ state: "idle" });
       return;
@@ -101,7 +101,7 @@ export default function SearchBox() {
           value={value}
           onChange={(e) => handleChange(e.target.value)}
           placeholder="მაგ: AH0673483"
-          maxLength={15}
+          maxLength={9}
           className="flex-1 min-w-0 bg-transparent text-md sm:text-xl outline-none placeholder:text-neutral-400"
           aria-label="მართვის მოწმობის ნომერი"
         />

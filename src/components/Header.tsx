@@ -38,11 +38,11 @@ export default function Header() {
       </button>
 
       {open && (
-        <div className="absolute right-6 top-16 z-40 w-60 rounded-2xl glass-panel text-white px-5 pb-5 pt-2 flex flex-col items-start gap-4">
+        <div className="absolute pt-5 right-6 top-16 z-40 w-60 rounded-2xl glass-panel text-white px-5 pb-5  flex flex-col items-start gap-4">
           <button
             aria-label="დახურვა"
             onClick={() => setOpen(false)}
-            className="self-end text-lg leading-none text-neutral-400 hover:text-white"
+            className="self-end text-lg leading-none text-neutral-400 hover:text-white absolute top-2.5 right-3.75"
           >
             ×
           </button>

@@ -1,9 +1,15 @@
+// Broad format used by the v1 API — must keep accepting courier keys
+// (COURIER + hash) and legacy migrated values.
 export const LICENSE_RE = /^[A-Z0-9]{3,15}$/;
+
+// Georgian driving licence number: two Latin letters + seven digits
+// (e.g. TH4844475). Enforced on the website UI and web add endpoint.
+export const LICENSE_STRICT_RE = /^[A-Z]{2}[0-9]{7}$/;
 
 export const ERRORS = {
   license: "გამოიყენეთ მხოლოდ ლათინური ასოები და ციფრები",
   licenseRequired: "შეიყვანეთ მართვის მოწმობის ნომერი",
-  licenseInvalid: "მართვის მოწმობის ნომერი არასწორია",
+  licenseInvalid: "მართვის მოწმობის ფორმატი არასწორია",
   commentRequired: "ჩაწერეთ გაშავების მიზეზი",
   commentTooLong: "კომენტარი არ უნდა აღემატებოდეს 500 სიმბოლოს",
   alreadyBlacklisted: "ეს მართვის მოწმობის ნომერი უკვე შავ სიაშია",
