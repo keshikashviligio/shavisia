@@ -97,7 +97,7 @@ export default function SearchBox() {
           onChange={(e) => handleChange(e.target.value)}
           placeholder="მაგ: AH0673483"
           maxLength={15}
-          className="flex-1 min-w-0 bg-transparent text-lg sm:text-2xl outline-none placeholder:text-neutral-400"
+          className="flex-1 min-w-0 bg-transparent text-md sm:text-xl outline-none placeholder:text-neutral-400"
           aria-label="მართვის მოწმობის ნომერი"
         />
         <button
