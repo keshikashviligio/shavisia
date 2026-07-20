@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await sendSms(phone, `shavisia.ge — ერთჯერადი კოდი: ${result.code}`);
+    await sendSms(phone, `OTP to sign in is: ${result.code}`);
   } catch (e) {
     if (e instanceof SmsSendError) {
       return NextResponse.json(
