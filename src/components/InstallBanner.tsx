@@ -45,6 +45,9 @@ export default function InstallBanner() {
   const [ui, setUi] = useState<"none" | "button" | "banner" | "ios">("none");
   const [shown, setShown] = useState(false);
   const [platform, setPlatform] = useState<"chromium" | "ios" | null>(null);
+  // iOS browser without an install path (Chrome/Firefox/Edge on iOS):
+  // the sheet gains a first step — open the site in Safari
+  const [needsSafari, setNeedsSafari] = useState(false);
   const deferred = useRef<BeforeInstallPromptEvent | null>(null);
 
   // animate every mounted surface in on the next frame
@@ -96,9 +99,10 @@ export default function InstallBanner() {
     window.addEventListener("appinstalled", onInstalled);
 
     let timer: ReturnType<typeof setTimeout> | undefined;
-    if (isIOSSafari) {
+    if (isIOS) {
       timer = setTimeout(() => {
         setPlatform("ios");
+        setNeedsSafari(!isIOSSafari);
         setUi("button");
       }, 2000);
     }
@@ -217,6 +221,104 @@ export default function InstallBanner() {
   // iOS instruction sheet
   const tile =
     "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[.16] bg-white/[.09]";
+  const steps: { icon: React.ReactNode; text: React.ReactNode }[] = [
+    ...(needsSafari
+      ? [
+          {
+            icon: (
+              // Safari compass
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#6db2ff"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="m14.5 9.5-1.8 4.2-4.2 1.8 1.8-4.2z" />
+              </svg>
+            ),
+            text: (
+              <>
+                გახსენი shavisia.ge{" "}
+                <strong className="text-white">Safari</strong>-ში
+              </>
+            ),
+          },
+        ]
+      : []),
+    {
+      icon: (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#6db2ff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M12 3v13" />
+          <path d="M7.5 7.5 12 3l4.5 4.5" />
+          <path d="M5 12v8h14v-8" />
+        </svg>
+      ),
+      text: (
+        <>
+          Safari-ში დააჭირე <strong className="text-white">გაზიარების</strong>{" "}
+          ღილაკს
+        </>
+      ),
+    },
+    {
+      icon: (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <rect x="4" y="4" width="16" height="16" rx="4" />
+          <path d="M12 9v6M9 12h6" />
+        </svg>
+      ),
+      text: (
+        <>
+          აირჩიე{" "}
+          <strong className="text-white">„მთავარ ეკრანზე დამატება“</strong>
+        </>
+      ),
+    },
+    {
+      icon: (
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#5ddb8a"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m5 13 4 4L19 7" />
+        </svg>
+      ),
+      text: (
+        <>
+          დაადასტურე — <strong className="text-white">„დამატება“</strong>
+        </>
+      ),
+    },
+  ];
   return (
     <div
       style={glass}
@@ -238,74 +340,20 @@ export default function InstallBanner() {
         </button>
       </div>
 
-      <div className="flex items-center gap-3.5">
-        <div className={tile}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#6db2ff"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 3v13" />
-            <path d="M7.5 7.5 12 3l4.5 4.5" />
-            <path d="M5 12v8h14v-8" />
-          </svg>
+      {steps.map((step, i) => (
+        <div key={i} className="flex items-center gap-3.5">
+          <div className={tile}>{step.icon}</div>
+          <p className="text-[13.5px] leading-normal text-white/85">
+            {i + 1}. {step.text}
+          </p>
         </div>
-        <p className="text-[13.5px] leading-normal text-white/85">
-          1. Safari-ში დააჭირე <strong className="text-white">გაზიარების</strong>{" "}
-          ღილაკს
-        </p>
-      </div>
+      ))}
 
-      <div className="flex items-center gap-3.5">
-        <div className={tile}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="4" y="4" width="16" height="16" rx="4" />
-            <path d="M12 9v6M9 12h6" />
-          </svg>
-        </div>
-        <p className="text-[13.5px] leading-normal text-white/85">
-          2. აირჩიე{" "}
-          <strong className="text-white">„მთავარ ეკრანზე დამატება“</strong>
+      {!needsSafari && (
+        <p className="text-center text-[11px] text-white/50">
+          გაზიარების ღილაკი აქ ↓
         </p>
-      </div>
-
-      <div className="flex items-center gap-3.5">
-        <div className={tile}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#5ddb8a"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m5 13 4 4L19 7" />
-          </svg>
-        </div>
-        <p className="text-[13.5px] leading-normal text-white/85">
-          3. დაადასტურე — <strong className="text-white">„დამატება“</strong>
-        </p>
-      </div>
-
-      <p className="text-center text-[11px] text-white/50">
-        გაზიარების ღილაკი აქ ↓
-      </p>
+      )}
     </div>
   );
 }
