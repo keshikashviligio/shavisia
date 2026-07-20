@@ -5,17 +5,19 @@ import Header from "@/components/Header";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <Header />
+      <div className="flex-1 flex flex-col min-h-svh sm:min-h-0">
+        <Header />
 
-      <main className="flex-1 flex flex-col items-center px-6 pt-8">
-        <SearchBox />
-      </main>
+        <main className="flex-1 flex flex-col items-center justify-center pb-24 px-6 sm:justify-start sm:pb-0 sm:pt-8">
+          <SearchBox />
+        </main>
+      </div>
 
       <footer className="px-6 pb-10 pt-24">
         <div className="max-w-5xl mx-auto grid gap-16 sm:grid-cols-2">
           <div className="flex flex-col items-center text-center gap-4">
-            <Image src="/icons/shield-star.svg" alt="" width={88} height={88} />
-            <h2 className="font-bold text-lg">
+            <Image className="opacity-80" src="/icons/shield-star.svg" alt="" width={88} height={88} />
+            <h2 className="font-bold text-neutral-200 text-md sm:text-lg">
               გაქირავების უსაფრთხოების გაძლიერება
             </h2>
             <p className="text-sm text-neutral-300 max-w-md">
@@ -26,8 +28,8 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col items-center text-center gap-4">
-            <Image src="/icons/badge-medal.svg" alt="" width={88} height={88} />
-            <h2 className="font-bold text-lg">
+            <Image  className="opacity-80" src="/icons/badge-medal.svg" alt="" width={88} height={88} />
+            <h2 className="font-bold text-neutral-200 text-md sm:text-lg">
               გამქირავებელზე მორგებული გადაწყვეტა
             </h2>
             <p className="text-sm text-neutral-300 max-w-md">

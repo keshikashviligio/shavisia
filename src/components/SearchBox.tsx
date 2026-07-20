@@ -68,17 +68,19 @@ export default function SearchBox() {
 
   return (
     <div className="w-full max-w-3xl flex flex-col items-start gap-6">
-      <Image
-        src={isBlacklisted ? "/icons/turtle-error.svg" : "/icons/turtle.svg"}
-        alt="shavisia.ge"
-        width={160}
-        height={160}
-        className="self-center"
-        priority
-      />
+      <a href="/" aria-label="მთავარი გვერდი" className="self-center">
+        <Image
+          src={isBlacklisted ? "/icons/turtle-error.svg" : "/icons/turtle.svg"}
+          alt="shavisia.ge"
+          width={150}
+          height={150}
+          className="turtle-walk"
+          priority
+        />
+      </a>
 
-      <p className="text-xl self-center text-center">
-        დაამატე ან გადაამოწმე მძღოლი{" "}
+      <p className="text-md sm:text-xl self-center text-center sd">
+        დაამატე ან გადაამოწმე მძღოლი{" "}<br/>
         <strong>მართვის მოწმობის ნომრით</strong>
       </p>
 

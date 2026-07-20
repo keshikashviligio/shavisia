@@ -28,6 +28,37 @@ body {
   font-family: var(--font-georgian), Arial, Helvetica, sans-serif;
 }
 
+/* Slow walking illusion for the turtle mascot: a gentle waddle —
+   rocking side to side, bobbing on each "step", swaying forward */
+.turtle-walk {
+  animation: turtle-waddle 3.2s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .turtle-walk {
+    animation: none;
+  }
+}
+
+@keyframes turtle-waddle {
+  0% {
+    transform: translate(0, 0) rotate(-1.6deg);
+  }
+  25% {
+    transform: translate(2px, -3px) rotate(0deg);
+  }
+  50% {
+    transform: translate(4px, 0) rotate(1.6deg);
+  }
+  75% {
+    transform: translate(2px, -3px) rotate(0deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(-1.6deg);
+  }
+}
+
 /* Frosted glass surface for controls sitting directly on the page */
 @utility glass {
   background: linear-gradient(
