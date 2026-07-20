@@ -57,15 +57,18 @@ export async function GET(req: NextRequest) {
       createdAt: true,
       removedAt: true,
       apiClientId: true,
+      createdBy: { select: { phone: true } },
     },
   });
 
-  const entries = rows.map(({ apiClientId, metadata, ...entry }) => {
+  const entries = rows.map(({ apiClientId, metadata, createdBy, ...entry }) => {
     const own = apiClientId === client.id;
     return {
       ...entry,
       metadata: own ? metadata : null,
       source: own ? ("own" as const) : ("shavisia.ge" as const),
+      // phone of the website user who created the entry (null for clients)
+      createdByPhone: createdBy?.phone ?? null,
     };
   });
 

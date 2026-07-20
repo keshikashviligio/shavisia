@@ -3,6 +3,7 @@ export const LICENSE_RE = /^[A-Z0-9]{3,15}$/;
 export const ERRORS = {
   license: "გამოიყენეთ მხოლოდ ლათინური ასოები და ციფრები",
   licenseRequired: "შეიყვანეთ მართვის მოწმობის ნომერი",
+  licenseInvalid: "მართვის მოწმობის ნომერი არასწორია",
   commentRequired: "ჩაწერეთ გაშავების მიზეზი",
   commentTooLong: "კომენტარი არ უნდა აღემატებოდეს 500 სიმბოლოს",
   alreadyBlacklisted: "ეს მართვის მოწმობის ნომერი უკვე შავ სიაშია",

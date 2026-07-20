@@ -85,9 +85,13 @@ Lists the calling client's entries (max 1000, newest first). Filters, all option
   private to the client that created the entry. Own entries always have
   `source: "own"`.
 
+`createdByPhone` is the phone of the website user who created the entry
+(null for entries created by API clients).
+
 ```json
 { "entries": [ { "licenseNumber": "…", "comment": "…", "metadata": {…},
-  "status": "ACTIVE", "createdAt": "…", "removedAt": null, "source": "own" } ] }
+  "status": "ACTIVE", "createdAt": "…", "removedAt": null, "source": "own",
+  "createdByPhone": null } ] }
 ```
 
 ## Webhooks

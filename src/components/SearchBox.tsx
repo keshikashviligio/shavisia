@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ERRORS } from "@/lib/license";
+import { ERRORS, LICENSE_RE } from "@/lib/license";
 import AuthModal from "./AuthModal";
 import AddModal from "./AddModal";
 
@@ -37,6 +37,11 @@ export default function SearchBox() {
 
   async function handleSearch() {
     if (!hasText || busy) return;
+    if (!LICENSE_RE.test(value)) {
+      setError(ERRORS.licenseInvalid);
+      setResult({ state: "idle" });
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
