@@ -13,10 +13,10 @@ export default function Home() {
         </main>
       </div>
 
-      <footer className="px-6 pb-10 pt-24">
+      <footer className="px-6 pb-10 pt-30">
         <div className="max-w-5xl mx-auto grid gap-16 sm:grid-cols-2">
           <div className="flex flex-col items-center text-center gap-4">
-            <Image className="opacity-80" src="/icons/shield-star.svg" alt="" width={88} height={88} />
+            <Image className="opacity-80" src="/icons/shield-star.svg" alt="" width={80} height={80} />
             <h2 className="font-bold text-neutral-200 text-md sm:text-lg">
               გაქირავების უსაფრთხოების გაძლიერება
             </h2>
@@ -28,7 +28,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-col items-center text-center gap-4">
-            <Image  className="opacity-80" src="/icons/badge-medal.svg" alt="" width={88} height={88} />
+            <Image  className="opacity-80" src="/icons/badge-medal.svg" alt="" width={80} height={80} />
             <h2 className="font-bold text-neutral-200 text-md sm:text-lg">
               გამქირავებელზე მორგებული გადაწყვეტა
             </h2>
