@@ -158,7 +158,7 @@ function ProfileTab({ initialPhone }: { initialPhone: string }) {
             <button
               type="submit"
               disabled={busy}
-              className="bg-white text-black px-6 py-2 rounded-md disabled:opacity-60"
+              className="bg-white hover:bg-neutral-200 transition-colors text-black px-6 py-2 rounded-full disabled:opacity-60"
             >
               კოდის გაგზავნა
             </button>
@@ -197,7 +197,7 @@ function ProfileTab({ initialPhone }: { initialPhone: string }) {
             <button
               type="submit"
               disabled={busy}
-              className="bg-white text-black px-6 py-2 rounded-md disabled:opacity-60"
+              className="bg-white hover:bg-neutral-200 transition-colors text-black px-6 py-2 rounded-full disabled:opacity-60"
             >
               დადასტურება
             </button>
@@ -290,7 +290,7 @@ function BlacklistTab() {
             <button
               onClick={confirmDelete}
               disabled={busy}
-              className="bg-black text-white px-8 py-3 rounded-md disabled:opacity-60"
+              className="bg-white hover:bg-neutral-200 transition-colors text-black px-8 py-3 rounded-full disabled:opacity-60"
             >
               დიახ
             </button>

@@ -72,7 +72,7 @@ export default function AddModal({
           placeholder="AH0673483"
           maxLength={15}
           autoFocus={!initialLicense}
-          className="bg-transparent border-b border-black pb-1 outline-none placeholder:text-neutral-600"
+          className="bg-transparent border-b border-white/30 focus:border-white pb-1 outline-none placeholder:text-neutral-500"
         />
 
         <label className="text-xs mt-6">
@@ -84,13 +84,13 @@ export default function AddModal({
           placeholder="კომენტარი"
           rows={5}
           autoFocus={!!initialLicense}
-          className="bg-transparent border border-black rounded-md p-3 outline-none resize-none placeholder:text-neutral-600"
+          className="bg-white/5 border border-white/25 focus:border-white/60 rounded-xl p-3 outline-none resize-none placeholder:text-neutral-500"
         />
-        <p className="text-xs text-neutral-700 self-end">
+        <p className="text-xs text-neutral-400 self-end">
           {comment.length}/{COMMENT_MAX}
         </p>
 
-        {error && <p className="text-red-700 text-sm">{error}</p>}
+        {error && <p className="text-danger text-sm">{error}</p>}
 
         <div className="flex justify-end items-center gap-6 mt-6">
           <button type="button" onClick={onClose} disabled={busy}>
@@ -99,7 +99,7 @@ export default function AddModal({
           <button
             type="submit"
             disabled={busy}
-            className="bg-black text-white px-8 py-3 rounded-md disabled:opacity-60"
+            className="bg-white hover:bg-neutral-200 transition-colors text-black px-8 py-3 rounded-full disabled:opacity-60"
           >
             დამატება
           </button>

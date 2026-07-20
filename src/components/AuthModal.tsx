@@ -88,13 +88,13 @@ export default function AuthModal({
             placeholder="+995"
             inputMode="tel"
             autoFocus
-            className="bg-transparent border-b border-black pb-1 outline-none placeholder:text-neutral-600"
+            className="bg-transparent border-b border-white/30 focus:border-white pb-1 outline-none placeholder:text-neutral-500"
           />
-          {error && <p className="text-red-700 text-sm mt-2">{error}</p>}
+          {error && <p className="text-danger text-sm mt-2">{error}</p>}
           <button
             type="submit"
             disabled={busy}
-            className="mt-10 self-center bg-black text-white px-10 py-3 rounded-md disabled:opacity-60"
+            className="mt-10 self-center bg-white hover:bg-neutral-200 transition-colors text-black px-10 py-3 rounded-full disabled:opacity-60"
           >
             შესვლა
           </button>
@@ -120,14 +120,14 @@ export default function AuthModal({
             inputMode="numeric"
             maxLength={6}
             autoFocus
-            className="bg-transparent border-b border-black pb-1 outline-none tracking-widest placeholder:text-neutral-600"
+            className="bg-transparent border-b border-white/30 focus:border-white pb-1 outline-none tracking-widest placeholder:text-neutral-500"
           />
-          {error && <p className="text-red-700 text-sm mt-2">{error}</p>}
+          {error && <p className="text-danger text-sm mt-2">{error}</p>}
           <button
             type="button"
             onClick={requestCode}
             disabled={cooldown > 0}
-            className="text-sm underline self-start mt-2 disabled:no-underline disabled:text-neutral-600"
+            className="text-sm underline self-start mt-2 disabled:no-underline disabled:text-neutral-500"
           >
             {cooldown > 0
               ? `კოდის თავიდან გაგზავნა (${cooldown}წმ)`
@@ -136,7 +136,7 @@ export default function AuthModal({
           <button
             type="submit"
             disabled={busy}
-            className="mt-6 self-center bg-black text-white px-10 py-3 rounded-md disabled:opacity-60"
+            className="mt-6 self-center bg-white hover:bg-neutral-200 transition-colors text-black px-10 py-3 rounded-full disabled:opacity-60"
           >
             დადასტურება
           </button>

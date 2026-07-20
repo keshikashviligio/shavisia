@@ -83,7 +83,7 @@ export default function SearchBox() {
       </p>
 
       <form
-        className="w-full flex items-center gap-2 bg-pill rounded-full p-2 pl-5 sm:p-3 sm:pl-8"
+        className="w-full flex items-center gap-2 glass rounded-full p-2 pl-5 sm:p-3 sm:pl-8"
         onSubmit={(e) => {
           e.preventDefault();
           if (hasText) handleSearch();
@@ -101,7 +101,7 @@ export default function SearchBox() {
         <button
           type="submit"
           disabled={busy}
-          className="flex shrink-0 items-center gap-2 bg-pill-button hover:bg-neutral-300 transition-colors text-black text-base sm:text-lg rounded-full px-4 py-2.5 sm:px-6 sm:py-3 disabled:opacity-60"
+          className="flex shrink-0 items-center gap-2 bg-white/85 hover:bg-white transition-colors text-black text-base sm:text-lg rounded-full px-4 py-2.5 sm:px-6 sm:py-3 disabled:opacity-60"
         >
           {busy ? (
             <svg

@@ -21,17 +21,17 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-md rounded-lg bg-neutral-400 text-black p-8 shadow-xl"
+        className="relative w-full max-w-md rounded-3xl glass-panel text-white p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
           aria-label="დახურვა"
-          className="absolute right-4 top-2 text-2xl leading-none text-neutral-700 hover:text-black"
+          className="absolute right-4 top-2 text-2xl leading-none text-neutral-400 hover:text-white"
         >
           ×
         </button>
