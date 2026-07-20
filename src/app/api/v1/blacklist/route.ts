@@ -16,8 +16,11 @@ function parkIdFilters(parkId: string): Prisma.BlacklistEntryWhereInput[] {
   return filters;
 }
 
-// GET /api/v1/blacklist?park_id=123&status=active|removed|all
-// Lists the calling client's entries (default: active only).
+// GET /api/v1/blacklist?park_id=123&status=active|removed|all&scope=own|all
+// Lists the calling client's entries (default: active only, own only).
+// scope=all additionally returns entries from other sources (web users,
+// other clients) tagged source:"shavisia.ge" — with their metadata withheld,
+// since metadata is private to the client that created the entry.
 export async function GET(req: NextRequest) {
   const client = await getApiClient(req);
   if (!client) {
@@ -30,10 +33,14 @@ export async function GET(req: NextRequest) {
   if (!["active", "removed", "all"].includes(status)) {
     return NextResponse.json({ error: "invalid_status" }, { status: 400 });
   }
+  const scope = req.nextUrl.searchParams.get("scope") ?? "own";
+  if (!["own", "all"].includes(scope)) {
+    return NextResponse.json({ error: "invalid_scope" }, { status: 400 });
+  }
 
-  const entries = await prisma.blacklistEntry.findMany({
+  const rows = await prisma.blacklistEntry.findMany({
     where: {
-      apiClientId: client.id,
+      ...(scope === "all" ? {} : { apiClientId: client.id }),
       ...(status === "all"
         ? {}
         : { status: status === "removed" ? "REMOVED" : "ACTIVE" }),
@@ -49,7 +56,17 @@ export async function GET(req: NextRequest) {
       status: true,
       createdAt: true,
       removedAt: true,
+      apiClientId: true,
     },
+  });
+
+  const entries = rows.map(({ apiClientId, metadata, ...entry }) => {
+    const own = apiClientId === client.id;
+    return {
+      ...entry,
+      metadata: own ? metadata : null,
+      source: own ? ("own" as const) : ("shavisia.ge" as const),
+    };
   });
 
   return NextResponse.json({ entries });

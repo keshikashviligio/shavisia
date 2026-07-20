@@ -72,17 +72,22 @@ Soft-removes the entry — only if it was created by the calling client **and** 
 
 Note: after removal the license can be blacklisted again (by anyone).
 
-### `GET /api/v1/blacklist?park_id=123&status=active&license=AH0673483`
+### `GET /api/v1/blacklist?park_id=123&status=active&license=AH0673483&scope=own`
 
 Lists the calling client's entries (max 1000, newest first). Filters, all optional:
 
 - `status` — `active` (default) · `removed` · `all` (`400 invalid_status` otherwise)
 - `license` — exact match (normalized to uppercase)
 - `park_id` — matches `metadata.park_id`
+- `scope` — `own` (default) · `all` (`400 invalid_scope` otherwise). `all` also
+  returns entries created by other sources (website users, other clients);
+  those come with `source: "shavisia.ge"` and `metadata: null` — metadata is
+  private to the client that created the entry. Own entries always have
+  `source: "own"`.
 
 ```json
 { "entries": [ { "licenseNumber": "…", "comment": "…", "metadata": {…},
-  "status": "ACTIVE", "createdAt": "…", "removedAt": null } ] }
+  "status": "ACTIVE", "createdAt": "…", "removedAt": null, "source": "own" } ] }
 ```
 
 ## Webhooks
