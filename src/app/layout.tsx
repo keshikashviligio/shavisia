@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Georgian } from "next/font/google";
+import PwaRegister from "@/components/PwaRegister";
+import InstallBanner from "@/components/InstallBanner";
 import "./globals.css";
 
 const notoGeorgian = Noto_Sans_Georgian({
@@ -11,6 +13,15 @@ export const metadata: Metadata = {
   title: "shavisia.ge",
   description:
     "დაამატე ან გადაამოწმე მძღოლი მართვის მოწმობის ნომრით — შავი სია ავტომობილების გამქირავებლებისთვის",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "shavisia.ge",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -20,7 +31,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ka" className={`${notoGeorgian.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <PwaRegister />
+        <InstallBanner />
+      </body>
     </html>
   );
 }

@@ -5,10 +5,10 @@ import Header from "@/components/Header";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="flex-1 flex flex-col min-h-svh sm:min-h-0">
+      <div className="flex-1 flex flex-col min-h-svh">
         <Header />
 
-        <main className="flex-1 flex flex-col items-center justify-center pb-24 px-6 sm:justify-start sm:pb-0 sm:pt-8">
+        <main className="flex-1 flex flex-col items-center justify-center pb-24 px-6">
           <SearchBox />
         </main>
       </div>
