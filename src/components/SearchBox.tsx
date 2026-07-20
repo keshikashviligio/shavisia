@@ -105,6 +105,18 @@ export default function SearchBox() {
           className="flex-1 min-w-0 bg-transparent text-md sm:text-xl outline-none placeholder:text-neutral-400"
           aria-label="მართვის მოწმობის ნომერი"
         />
+        {hasText && (
+          <button
+            type="button"
+            onClick={() => handleChange("")}
+            aria-label="გასუფთავება"
+            className="sm:hidden shrink-0 p-1 text-neutral-400 active:text-white"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.5 12.1-1.4 1.4L12 13.4l-2.1 2.1-1.4-1.4 2.1-2.1-2.1-2.1 1.4-1.4 2.1 2.1 2.1-2.1 1.4 1.4-2.1 2.1 2.1 2.1Z" />
+            </svg>
+          </button>
+        )}
         <button
           type="submit"
           disabled={busy}

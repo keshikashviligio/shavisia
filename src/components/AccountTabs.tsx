@@ -266,7 +266,7 @@ function BlacklistTab() {
           <button
             aria-label="წაშლა"
             onClick={() => setToDelete(entry)}
-            className="text-red-800 hover:text-red-600 shrink-0 mt-1"
+            className="text-red-500 hover:text-red-400 shrink-0 mt-1"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v7M14 10v7" />
