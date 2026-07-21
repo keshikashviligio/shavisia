@@ -174,7 +174,10 @@ export default function SearchBox() {
       {modal === "auth" && (
         <AuthModal
           onClose={() => setModal(null)}
-          onSuccess={() => setModal("add")}
+          onSuccess={() => {
+            setModal("add")
+            window.scroll({ top: 0, behavior: "smooth" });
+          }}
         />
       )}
 
