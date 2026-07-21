@@ -4,14 +4,9 @@ import { getSessionUser } from "@/lib/session";
 import Header from "@/components/Header";
 import AccountTabs from "@/components/AccountTabs";
 
-export default async function AccountPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ tab?: string }>;
-}) {
+export default async function AccountPage() {
   const user = await getSessionUser();
   if (!user) redirect("/");
-  const { tab } = await searchParams;
 
   return (
     <div className="min-h-screen">
@@ -23,10 +18,7 @@ export default async function AccountPage({
           </Link>{" "}
           / <span className="text-white">მენიუ</span>
         </p>
-        <AccountTabs
-          initialTab={tab === "blacklist" ? "blacklist" : "profile"}
-          initialPhone={user.phone}
-        />
+        <AccountTabs initialPhone={user.phone} />
       </main>
     </div>
   );

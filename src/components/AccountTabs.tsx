@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Modal from "./Modal";
 import { ERRORS } from "@/lib/license";
 
@@ -14,13 +15,16 @@ type Entry = {
 };
 
 export default function AccountTabs({
-  initialTab,
   initialPhone,
 }: {
-  initialTab: Tab;
   initialPhone: string;
 }) {
-  const [tab, setTab] = useState<Tab>(initialTab);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // The URL is the source of truth, so header links to /account?tab=… switch
+  // the tab even when the account page is already open.
+  const tab: Tab =
+    searchParams.get("tab") === "blacklist" ? "blacklist" : "profile";
 
   return (
     <div>
@@ -33,7 +37,9 @@ export default function AccountTabs({
         ).map(([key, label]) => (
           <button
             key={key}
-            onClick={() => setTab(key)}
+            onClick={() =>
+              router.replace(`/account?tab=${key}`, { scroll: false })
+            }
             className={`pb-3 -mb-px border-b-2 transition-colors ${
               tab === key
                 ? "border-white text-white"
