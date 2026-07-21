@@ -86,7 +86,7 @@ export default function SearchBox() {
       </a>
 
       <p className="text-md sm:text-xl self-center text-center sd">
-        დაამატე ან გადაამოწმე მძღოლი{" "}<br/>
+        დაამატე ან გადაამოწმე მძღოლი შავ სიაში<br/>
         <strong>მართვის მოწმობის ნომრით</strong>
       </p>
 
