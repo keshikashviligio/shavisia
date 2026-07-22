@@ -32,9 +32,6 @@ export default async function Image() {
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={turtle} alt="" width={280} height={280} />
-        <div style={{ marginTop: 32, fontSize: 96, fontWeight: 700 }}>
-          shavisia.ge
-        </div>
       </div>
     ),
     size

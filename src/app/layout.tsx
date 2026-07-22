@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     type: "website",
     url: "/",
     siteName: "shavisia.ge",
-    title: "shavisia.ge — მძღოლების შავი სია",
+    title: "მძღოლების შავი სია",
     description:
       "დაამატე ან გადაამოწმე მძღოლი მართვის მოწმობის ნომრით — შავი სია ავტომობილების გამქირავებლებისთვის",
     locale: "ka_GE",
