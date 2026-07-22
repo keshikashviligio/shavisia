@@ -10,9 +10,25 @@ const notoGeorgian = Noto_Sans_Georgian({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://shavisia.ge"),
   title: "shavisia.ge",
   description:
     "დაამატე ან გადაამოწმე მძღოლი მართვის მოწმობის ნომრით — შავი სია ავტომობილების გამქირავებლებისთვის",
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "shavisia.ge",
+    title: "shavisia.ge — მძღოლების შავი სია",
+    description:
+      "დაამატე ან გადაამოწმე მძღოლი მართვის მოწმობის ნომრით — შავი სია ავტომობილების გამქირავებლებისთვის",
+    locale: "ka_GE",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "shavisia.ge — მძღოლების შავი სია",
+    description:
+      "დაამატე ან გადაამოწმე მძღოლი მართვის მოწმობის ნომრით — შავი სია ავტომობილების გამქირავებლებისთვის",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
