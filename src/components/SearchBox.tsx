@@ -36,8 +36,13 @@ export default function SearchBox() {
   }
 
   async function handleSearch() {
-    if (!hasText || busy) return;
+    if (busy) return;
     window.scroll({ top: 0, behavior: "smooth" });
+    if (!hasText) {
+      setError(ERRORS.licenseRequired);
+      setResult({ state: "idle" });
+      return;
+    }
     if (!LICENSE_STRICT_RE.test(value)) {
       setError(ERRORS.licenseInvalid);
       setResult({ state: "idle" });
@@ -118,7 +123,7 @@ export default function SearchBox() {
         )}
         <button
           type="submit"
-          disabled={busy || !hasText}
+          disabled={busy}
           className="flex shrink-0 items-center gap-2 bg-white/85 hover:bg-white transition-colors text-black text-base sm:text-lg rounded-full px-4 py-2.5 sm:px-6 sm:py-3"
         >
           {busy ? (
