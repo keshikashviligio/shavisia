@@ -85,7 +85,7 @@ export default function SearchBox() {
         />
       </a>
 
-      <p className="text-md sm:text-xl self-center text-center sd">
+      <p className="text-xl sm:text-xl self-center text-center sd">
         დაამატე ან <strong>გადაამოწმე მძღოლი შავ სიაში</strong> მართვის მოწმობის ნომრით
       </p>
 
@@ -93,8 +93,7 @@ export default function SearchBox() {
         className="w-full flex items-center gap-2 glass rounded-full p-2 pl-5 sm:p-3 sm:pl-8"
         onSubmit={(e) => {
           e.preventDefault();
-          if (hasText) handleSearch();
-          else handleAdd();
+          handleSearch();
         }}
       >
         <input
@@ -119,8 +118,8 @@ export default function SearchBox() {
         )}
         <button
           type="submit"
-          disabled={busy}
-          className="flex shrink-0 items-center gap-2 bg-white/85 hover:bg-white transition-colors text-black text-base sm:text-lg rounded-full px-4 py-2.5 sm:px-6 sm:py-3 disabled:opacity-60"
+          disabled={busy || !hasText}
+          className="flex shrink-0 items-center gap-2 bg-white/85 hover:bg-white transition-colors text-black text-base sm:text-lg rounded-full px-4 py-2.5 sm:px-6 sm:py-3"
         >
           {busy ? (
             <svg
@@ -134,15 +133,23 @@ export default function SearchBox() {
             >
               <path d="M12 3a9 9 0 1 1-9 9" />
             </svg>
-          ) : hasText ? (
+          ) : (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
             </svg>
-          ) : (
-            <span className="text-xl leading-none">+</span>
           )}
-          {hasText ? "ძიება" : "დამატება"}
+          ძიება
+        </button>
+        <button
+          type="button"
+          onClick={handleAdd}
+          aria-label="დამატება"
+          className="flex shrink-0 items-center justify-center bg-white/85 hover:bg-white transition-colors text-black rounded-full p-2.5 sm:p-3"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
         </button>
       </form>
 
